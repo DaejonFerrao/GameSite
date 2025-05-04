@@ -5,6 +5,7 @@ import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti'
 import { useEffect } from 'react';
 import { useWindowScroll } from 'react-use';
+import gsap from 'gsap';
 
 
 const navItems = ["Nexus", "About", "Roadmap", "Team", "Contact"];
@@ -21,11 +22,28 @@ const Navbar = () => {
     const { y: currentScrollY } = useWindowScroll();
 
     useEffect(() => {
-        if(currentScrollY === 0) {
+        if (currentScrollY === 0) {
             setIsNavbarVisible(true);
             navContainerRef.current.classList.remove = ('floating-nav');
+        } else if (currentScrollY > LastScrollY) {
+            setIsNavbarVisible(false);
+            navContainerRef.current.classList.add('floating-nav');
+        } else if (currentScrollY < LastScrollY) {
+            setIsNavbarVisible(true);
+            navContainerRef.current.classList.add('floating-nav');
         }
-    }, [currentScrollY]);
+
+        setLastScrollY(currentScrollY);
+    }, [currentScrollY, LastScrollY]);
+
+    useEffect(() => {
+        gsap.to(navContainerRef.current, {
+            y: isNavbarVisible ? 0 : -100,
+            opacity: isNavbarVisible ? 1 : 0,
+            duration: 0.2,
+
+        })
+    }, [isNavbarVisible]);
 
     const toggleAudioIndicator = () => {
         setIsAudioPlaying((prev) => !prev);
@@ -42,7 +60,7 @@ const Navbar = () => {
 
     return (
         <div ref={navContainerRef} className="fixed inset-x-0 top-4 z-50 h-16
-    border-none transition-all duration-700 sm:inset-x-6">
+            border-none transition-all duration-700 sm:inset-x-6">
             <header className='absolute top-1/2 w-full -translate-y-1/2'>
                 <nav className="flex size-full items-center justify-between p-4">
                     <div className="flex items-center gap-7">
@@ -71,7 +89,7 @@ const Navbar = () => {
                         <button
                             className="ml-10 flex items-center space-x-0.5"
                             onClick={toggleAudioIndicator}
-                        >
+                         >
                             <audio
                                 ref={audioElementRef}
                                 className='hidden'
